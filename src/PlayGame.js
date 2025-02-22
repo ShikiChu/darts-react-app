@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Row, Col, Card, Button } from 'react-bootstrap';
 import { BsBackspace } from "react-icons/bs";
 
+
 const gameData = {
   "25": {
     "Board 1": "8 vs 11",
@@ -43,6 +44,9 @@ const PlayGame = () => {
   const [score2, setScore2] = useState(501);
   const [currentTurn, setCurrentTurn] = useState(1);
   const [inputScore, setInputScore] = useState('');
+  const [player1Index, setPlayer1Index] = useState(0);
+  const [player2Index, setPlayer2Index] = useState(0);
+
 
   const handleButtonClick = (value) => {
     if (value === "Bust") {
@@ -60,6 +64,9 @@ const PlayGame = () => {
       .then((data) => setTeams(data));
   }, []);
 
+
+
+
   const handleWeekChange = (event) => {
     setSelectedWeek(event.target.value);
     setSelectedBoard('');
@@ -75,28 +82,93 @@ const PlayGame = () => {
   const handleBoardChange = (event) => {
     setSelectedBoard(event.target.value);
     const match = gameData[selectedWeek][event.target.value].split(' vs ');
-    const teamOne = teams.find(team => team.team_name === match[0]);
-    const teamTwo = teams.find(team => team.team_name === match[1]);
+    const teamOne = teams.find(team => team.team_name.includes(match[0]));
+    const teamTwo = teams.find(team => team.team_name.includes(match[1]));
+
     setTeam1(teamOne);
     setTeam2(teamTwo);
     setScore1(501);
     setScore2(501);
     setCurrentTurn(1);
+
+    if (teamOne && teamTwo) {
+
+      setPlayer1(teamOne.teammates[0]?.name || '');
+      setPlayer2(teamTwo.teammates[0]?.name || '');
+
+    }
   };
 
-  const handleScoreSubmit = () => {
+
+  const handleScoreSubmit = async () => {
     const score = parseInt(inputScore, 10);
     if (isNaN(score) || score <= 0) return;
-
-    if (currentTurn === 1) {
-      setScore1(prev => Math.max(0, prev - score));
-      setCurrentTurn(2);
-    } else {
-      setScore2(prev => Math.max(0, prev - score));
-      setCurrentTurn(1);
+  
+    const highScore171180 = (score === 171 || score === 180) ? 1 : 0;
+    const playerData = {
+      total_points: score,
+      shots: 1,
+      games_finished: 0,
+      hs: 0,
+      h_finish: 0,
+      high_scores_171_180: highScore171180
+    };
+  
+    try {
+      // Update the score and player index first
+      if (currentTurn === 1) {
+        setScore1(prev => Math.max(0, prev - score));
+        setPlayer1Index(prevIndex => {
+          const newIndex = (prevIndex + 1) % team1.teammates.length;
+          setPlayer1(team1.teammates[newIndex]?.name || ''); // Update player1
+          return newIndex;
+        });
+        setCurrentTurn(2);
+  
+        // After updating the player, send the API request
+        const player1Id = team1.teammates[player1Index]?.id; // Use the updated index
+        if (player1Id) {
+          fetch(`http://localhost:5000/api/dart_score/scores/${player1Id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(playerData)
+          });
+          console.log("player1 added record");
+        }
+  
+      } else {
+        setScore2(prev => Math.max(0, prev - score));
+        setPlayer2Index(prevIndex => {
+          const newIndex = (prevIndex + 1) % team2.teammates.length;
+          setPlayer2(team2.teammates[newIndex]?.name || ''); // Update player2
+          return newIndex;
+        });
+        setCurrentTurn(1);
+  
+        // After updating the player, send the API request
+        const player2Id = team2.teammates[player2Index]?.id; // Use the updated index
+        if (player2Id) {
+          fetch(`http://localhost:5000/api/dart_score/scores/${player2Id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(playerData)
+          });
+          console.log("player2 added record");
+        }
+      }
+  
+      setInputScore('');
+    } catch (error) {
+      console.error('Error submitting score:', error);
     }
-    setInputScore('');
   };
+  
+  
+  
 
   return (
     <Container>
@@ -133,28 +205,26 @@ const PlayGame = () => {
       {team1 && team2 && (
         <>
           <Row className="mt-3">
-            <Col md={6}>
-              <Card className="p-3">
-                <h5>Team {team1.team_name}</h5>
-                <Form.Select value={player1} onChange={(e) => setPlayer1(e.target.value)}>
-                  <option value="">Select Player</option>
-                  {team1.teammates.map(player => (
-                    <option key={player.id} value={player.name}>{player.name}</option>
-                  ))}
-                </Form.Select>
-              </Card>
-            </Col>
-            <Col md={6}>
-              <Card className="p-3">
-                <h5>Team {team2.team_name}</h5>
-                <Form.Select value={player2} onChange={(e) => setPlayer2(e.target.value)}>
-                  <option value="">Select Player</option>
-                  {team2.teammates.map(player => (
-                    <option key={player.id} value={player.name}>{player.name}</option>
-                  ))}
-                </Form.Select>
-              </Card>
-            </Col>
+          <Col md={6}>
+        <Card className="p-3">
+          <h5>Team {team1.team_name}</h5>
+          <Form.Select value={player1} disabled>
+            {team1.teammates.map(player => (
+              <option key={player.id} value={player.name}>{player.name}</option>
+            ))}
+          </Form.Select>
+        </Card>
+      </Col>
+      <Col md={6}>
+        <Card className="p-3">
+          <h5>Team {team2.team_name}</h5>
+          <Form.Select value={player2} disabled>
+            {team2.teammates.map(player => (
+              <option key={player.id} value={player.name}>{player.name}</option>
+            ))}
+          </Form.Select>
+        </Card>
+      </Col>
           </Row>
 
           <Row className="mt-4">

@@ -7,17 +7,22 @@ const DartScores = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/dart_score/scores")
-      .then((response) => {
-        setScores(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError("Failed to fetch scores");
-        setLoading(false);
-      });
+    const interval = setInterval(() => {
+      axios
+        .get("http://localhost:5000/api/dart_score/scores")
+        .then((response) => {
+          setScores(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError("Failed to fetch scores");
+          setLoading(false);
+        });
+    }, 1000); // Fetch every 1s
+  
+    return () => clearInterval(interval); // Clean up the interval on unmount
   }, []);
+  
 
   if (loading) {
     return <div className="text-center mt-4">Loading...</div>;
