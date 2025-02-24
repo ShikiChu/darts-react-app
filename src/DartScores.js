@@ -34,7 +34,7 @@ const DartScores = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-3">Dart Scores</h2>
+      <h2 className="mb-3">Individual Dart Scores</h2>
       <table className="table table-bordered table-striped">
         <thead className="thead-dark">
           <tr>

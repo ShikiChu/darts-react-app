@@ -7,6 +7,7 @@ import Register from './Register';
 import TeamManagement from './TeamManagement';
 import PlayGame from './PlayGame';
 import DartScores from './DartScores';
+import TeamStats from './TeamStats';
 
 
 const App = () => {
@@ -37,7 +38,8 @@ const App = () => {
                 Manage Teams
               </Nav.Link>
               <Nav.Link as={Link} to="/play-game">Play Game</Nav.Link>
-              <Nav.Link as={Link} to="/dart-score">Check Stats</Nav.Link>
+              <Nav.Link as={Link} to="/dart-score">Check Individual Stats</Nav.Link>
+              <Nav.Link as={Link} to="/team-stats">Check Team Stats</Nav.Link>
 
               {!token ? (
                 <>
@@ -65,6 +67,7 @@ const App = () => {
           <Route path="/team-management" element={token ? <TeamManagement /> : <Navigate to="/login" replace />} />
           <Route path="/play-game" element={token ? <PlayGame />  : <Navigate to="/login" replace />  } />
           <Route path="/dart-score" element={token ? <DartScores />  : <Navigate to="/login" replace />  } />
+          <Route path="/team-stats" element={token ? <TeamStats />  : <Navigate to="/login" replace />  } />
           <Route path="*" element={<Navigate to={token ? '/play-game' : '/login'} />} />
         </Routes>
       </Container>

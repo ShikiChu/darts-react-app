@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Form, Row, Col, Card, Button } from 'react-bootstrap';
 import { BsBackspace } from "react-icons/bs";
+import './css/styles.css';
 
 
 const gameData = {
@@ -174,7 +175,7 @@ const PlayGame = () => {
     <Container>
       <h2 className="text-center my-4">Play Game Settings</h2>
       <Row className="mb-3">
-        <Col md={6}>
+        <Col sm={6}>
           <Form.Group>
             <Form.Label>Select Week</Form.Label>
             <Form.Select value={selectedWeek} onChange={handleWeekChange}>
@@ -185,7 +186,7 @@ const PlayGame = () => {
             </Form.Select>
           </Form.Group>
         </Col>
-        <Col md={6}>
+        <Col sm={6}>
           <Form.Group>
             <Form.Label>Select Board</Form.Label>
             <Form.Select 
@@ -205,7 +206,7 @@ const PlayGame = () => {
       {team1 && team2 && (
         <>
           <Row className="mt-3">
-          <Col md={6}>
+          <Col sm={6}>
         <Card className="p-3">
           <h5>Team {team1.team_name}</h5>
           <Form.Select value={player1} disabled>
@@ -215,7 +216,7 @@ const PlayGame = () => {
           </Form.Select>
         </Card>
       </Col>
-      <Col md={6}>
+      <Col sm={6}>
         <Card className="p-3">
           <h5>Team {team2.team_name}</h5>
           <Form.Select value={player2} disabled>
@@ -228,13 +229,13 @@ const PlayGame = () => {
           </Row>
 
           <Row className="mt-4">
-            <Col md={6}>
+            <Col sm={6}>
               <Card className={`p-3 ${currentTurn === 1 ? 'border border-danger' : ''}`}>
                 <h4>Team {team1.team_name}</h4>
                 <h2>{score1}</h2>
               </Card>
             </Col>
-            <Col md={6}>
+            <Col sm={6}>
               <Card className={`p-3 ${currentTurn === 2 ? 'border border-danger' : ''}`}>
                 <h4>Team {team2.team_name}</h4>
                 <h2>{score2}</h2>
@@ -243,7 +244,7 @@ const PlayGame = () => {
           </Row>
 
           <Row className="mt-4">
-            <Col md={6} className="offset-md-3">
+            <Col sm={12} >
               <Form.Group>
                 <Form.Label>Enter Your Score</Form.Label>
                 <Form.Control 
@@ -259,7 +260,7 @@ const PlayGame = () => {
             </Col>
           </Row>
           <Row className="mt-3 justify-content-center">
-            <Col md={6}>
+            <Col sm={12}>
               <div className="d-grid gap-2">
                 {rows.map((row, rowIndex) => (
                   <div key={rowIndex} className="d-flex justify-content-between">
