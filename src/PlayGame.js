@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Form, Row, Col, Card, Button,Modal } from 'react-bootstrap';
 import { BsBackspace } from "react-icons/bs";
 import './css/styles.css';
 
@@ -47,6 +47,8 @@ const PlayGame = () => {
   const [inputScore, setInputScore] = useState('');
   const [player1Index, setPlayer1Index] = useState(0);
   const [player2Index, setPlayer2Index] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [winnerName, setWinnerName] = useState("");
 
 
   const handleButtonClick = (value) => {
@@ -64,9 +66,47 @@ const PlayGame = () => {
       .then((response) => response.json())
       .then((data) => setTeams(data));
   }, []);
+  const apiUrl = "http://localhost:5000/api/team_stats/update_team_stats";
 
+  const updateTeamStats = async (loser, winner) => {
+    try {
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          game_plays: 1,
+          wins: 0,
+          team_id: loser.team_id,
+        }),
+      });
 
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          game_plays: 1,
+          wins: 1,
+          team_id: winner.team_id,
+        }),
+      });
 
+      console.log("Team stats updated successfully");
+      setWinnerName(winner.team_name);
+      setShowModal(true);
+
+      // Refresh the page
+    } catch (error) {
+      console.error("Error updating team stats:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (score1 === 0) {
+      updateTeamStats(team2, team1);
+    } else if (score2 === 0) {
+      updateTeamStats(team1, team2);
+    }
+  }, [score1, score2, team1, team2]); //new teams are loaded dynamically
 
   const handleWeekChange = (event) => {
     setSelectedWeek(event.target.value);
@@ -110,7 +150,7 @@ const PlayGame = () => {
       total_points: score,
       shots: 1,
       games_finished: 0,
-      hs: 0,
+      hs: score,
       h_finish: 0,
       high_scores_171_180: highScore171180
     };
@@ -167,9 +207,6 @@ const PlayGame = () => {
       console.error('Error submitting score:', error);
     }
   };
-  
-  
-  
 
   return (
     <Container>
@@ -206,26 +243,26 @@ const PlayGame = () => {
       {team1 && team2 && (
         <>
           <Row className="mt-3">
-          <Col sm={6}>
-        <Card className="p-3">
-          <h5>Team {team1.team_name}</h5>
-          <Form.Select value={player1} disabled>
-            {team1.teammates.map(player => (
-              <option key={player.id} value={player.name}>{player.name}</option>
-            ))}
-          </Form.Select>
-        </Card>
-      </Col>
-      <Col sm={6}>
-        <Card className="p-3">
-          <h5>Team {team2.team_name}</h5>
-          <Form.Select value={player2} disabled>
-            {team2.teammates.map(player => (
-              <option key={player.id} value={player.name}>{player.name}</option>
-            ))}
-          </Form.Select>
-        </Card>
-      </Col>
+            <Col sm={6}>
+              <Card className="p-3">
+                <h5>Team {team1.team_name}</h5>       
+                <Form.Select value={player1} disabled>
+                  {team1.teammates.map(player => (
+                    <option key={player.id} value={player.name}>{player.name}</option>
+                  ))}
+                </Form.Select>
+              </Card>
+            </Col>
+            <Col sm={6}>
+              <Card className="p-3">
+                <h5>Team {team2.team_name}</h5>
+                <Form.Select value={player2} disabled>
+                  {team2.teammates.map(player => (
+                    <option key={player.id} value={player.name}>{player.name}</option>
+                  ))}
+                </Form.Select>
+              </Card>
+            </Col>
           </Row>
 
           <Row className="mt-4">
@@ -242,6 +279,20 @@ const PlayGame = () => {
               </Card>
             </Col>
           </Row>
+
+          <Modal show={showModal} onHide={() => window.location.reload()} centered>
+            <Modal.Header closeButton>
+              <Modal.Title>🎉 Game Over! 🎉</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <h2 className="text-center">🏆 Team {winnerName} wins! 🍻</h2>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" onClick={() => window.location.reload()}>
+              Start A New Game
+              </Button>
+            </Modal.Footer>
+          </Modal>
 
           <Row className="mt-4">
             <Col sm={12} >
