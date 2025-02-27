@@ -2,29 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Row, Col, Card, Button,Modal } from 'react-bootstrap';
 import { BsBackspace } from "react-icons/bs";
 import './css/styles.css';
-
-
-const gameData = {
-  "25": {
-    "Board 1": "8 vs 11",
-    "Board 2": "9 vs 10",
-    "Board 3": "1 vs 3",
-    "Board 4": "6 vs 13",
-    "Board 5": "4 vs 2",
-    "Board 6": "7 vs 12",
-    "Board 7": "5 vs 14"
-  },
-  "26": {
-    "Board 1": "5 vs 12",
-    "Board 2": "1 vs 2",
-    "Board 3": "6 vs 11",
-    "Board 4": "3 vs 14",
-    "Board 5": "7 vs 10",
-    "Board 6": "8 vs 9",
-    "Board 7": "4 vs 13"
-  }
-};
-
+import gameData from './gameData'; 
   
 const rows = [
   ["26", "1", "2", "3", "57"],
@@ -155,58 +133,60 @@ const PlayGame = () => {
       high_scores_171_180: highScore171180
     };
   
+    const updateScore = async (playerId) => {
+      if (playerId) {
+        try {
+          await fetch(`http://localhost:5000/api/dart_score/scores/${playerId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(playerData)
+          });
+          console.log("Score updated in dart_score API");
+  
+          await fetch(`http://localhost:5000/api/dart_score_night/scores/${playerId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(playerData)
+          });
+          console.log("Score updated in dart_score_night API");
+        } catch (error) {
+          console.error('Error submitting score:', error);
+        }
+      }
+    };
+  
     try {
-      // Update the score and player index first
       if (currentTurn === 1) {
         setScore1(prev => Math.max(0, prev - score));
         setPlayer1Index(prevIndex => {
           const newIndex = (prevIndex + 1) % team1.teammates.length;
-          setPlayer1(team1.teammates[newIndex]?.name || ''); // Update player1
+          setPlayer1(team1.teammates[newIndex]?.name || '');
           return newIndex;
         });
         setCurrentTurn(2);
   
-        // After updating the player, send the API request
-        const player1Id = team1.teammates[player1Index]?.id; // Use the updated index
-        if (player1Id) {
-          fetch(`http://localhost:5000/api/dart_score/scores/${player1Id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(playerData)
-          });
-          console.log("player1 added record");
-        }
+        const player1Id = team1.teammates[player1Index]?.id;
+        await updateScore(player1Id);
   
       } else {
         setScore2(prev => Math.max(0, prev - score));
         setPlayer2Index(prevIndex => {
           const newIndex = (prevIndex + 1) % team2.teammates.length;
-          setPlayer2(team2.teammates[newIndex]?.name || ''); // Update player2
+          setPlayer2(team2.teammates[newIndex]?.name || '');
           return newIndex;
         });
         setCurrentTurn(1);
   
-        // After updating the player, send the API request
-        const player2Id = team2.teammates[player2Index]?.id; // Use the updated index
-        if (player2Id) {
-          fetch(`http://localhost:5000/api/dart_score/scores/${player2Id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(playerData)
-          });
-          console.log("player2 added record");
-        }
+        const player2Id = team2.teammates[player2Index]?.id;
+        await updateScore(player2Id);
       }
   
       setInputScore('');
     } catch (error) {
-      console.error('Error submitting score:', error);
+      console.error('Error handling score submission:', error);
     }
   };
+  
 
   return (
     <Container>

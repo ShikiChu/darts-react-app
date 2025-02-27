@@ -8,6 +8,7 @@ import TeamManagement from './TeamManagement';
 import PlayGame from './PlayGame';
 import DartScores from './DartScores';
 import TeamStats from './TeamStats';
+import DartScoresNight from './dart_scores_night';
 
 
 const App = () => {
@@ -38,9 +39,9 @@ const App = () => {
                 Manage Teams
               </Nav.Link>
               <Nav.Link as={Link} to="/play-game">Play Game</Nav.Link>
-              <Nav.Link as={Link} to="/dart-score">Check Individual Stats</Nav.Link>
+              <Nav.Link as={Link} to="/dart-score">Check Overall Stats</Nav.Link>
               <Nav.Link as={Link} to="/team-stats">Check Team Stats</Nav.Link>
-
+              <Nav.Link as={Link} to="/dart-score-night">Check Stats For Night</Nav.Link>
               {!token ? (
                 <>
                   <Nav.Link as={Link} to="/login">
@@ -64,6 +65,7 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login setToken={setToken} />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/dart-score-night" element={<DartScoresNight />} />
           <Route path="/team-management" element={token ? <TeamManagement /> : <Navigate to="/login" replace />} />
           <Route path="/play-game" element={token ? <PlayGame />  : <Navigate to="/login" replace />  } />
           <Route path="/dart-score" element={token ? <DartScores />  : <Navigate to="/login" replace />  } />
