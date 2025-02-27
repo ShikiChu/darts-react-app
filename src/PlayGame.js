@@ -34,7 +34,10 @@ const PlayGame = () => {
       setInputScore("Bust");
     } else if (value === "Backspace") {
       setInputScore((prev) => prev.slice(0, -1));
-    } else {
+    }else if (value === 26) {
+      handleScoreSubmit(value); 
+    }
+    else {
       setInputScore((prev) => prev + value);
     }
   };
